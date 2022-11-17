@@ -26,13 +26,15 @@ namespace NorthwindConsole
                     Console.WriteLine("2) Add Category");
                     Console.WriteLine("3) Display Category and related products");
                     Console.WriteLine("4) Display all Categories and their related products");
+                    Console.WriteLine("5) Edit Categories");
+                    Console.WriteLine("6) Delete Categories");
                     Console.WriteLine("\"q\" to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
                     logger.Info($"Option {choice} selected");
                     if (choice == "1")
                     {
-                        var db = new Northwind22JSGContext();
+                        var db = new NorthwindContext();
                         var query = db.Categories.OrderBy(p => p.CategoryName);
 
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -58,7 +60,7 @@ namespace NorthwindConsole
                         if (isValid)
                         {
                             logger.Info("Validation passed");
-                            var db = new Northwind22JSGContext();
+                            var db = new NorthwindContext();
                             // check for unique name
                             if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
                             {
@@ -66,6 +68,7 @@ namespace NorthwindConsole
                                 isValid = false;
                                 results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
                             }
+                            
                             else
                             {
                                 logger.Info("Validation passed");
@@ -81,7 +84,7 @@ namespace NorthwindConsole
                         }
                     }else if (choice == "3")
                     {
-                        var db = new Northwind22JSGContext();
+                        var db = new NorthwindContext();
                         var query = db.Categories.OrderBy(p => p.CategoryId);
 
                         Console.WriteLine("Select the category whose products you want to display:");
@@ -103,7 +106,7 @@ namespace NorthwindConsole
                     }
                     else if (choice == "4")
                     {
-                        var db = new Northwind22JSGContext();
+                        var db = new NorthwindContext();
                         var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
                         foreach (var item in query)
                         {
@@ -112,6 +115,21 @@ namespace NorthwindConsole
                             {
                                 Console.WriteLine($"\t{p.ProductName}");
                             }
+                        }
+                    }
+
+                    else if (choice == "5")
+                    {
+                        // delete product
+                        Console.WriteLine("Choose the Category to edit:");
+    
+                        var db = new NorthwindContext();
+                        var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
+                        foreach(var item in query)
+                        {
+                            Console.WriteLine($"{item.CategoryName}");
+
+                            logger.Info("Category edited");
                         }
                     }
                     Console.WriteLine();
@@ -127,3 +145,4 @@ namespace NorthwindConsole
         }
     }
 }
+
