@@ -1,9 +1,0 @@
-{
-    "NorthwindContext": {
-      "ConnectionString": "Server=bitsql.wctc.edu;Database=Northwind-22-JSG;User ID=XXX;Password=###"
-    },
-    "_comment": {
-      "##": "last 2 digits of CRN",
-      "XXX": "your initials"
-    }
-}
