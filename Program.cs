@@ -26,8 +26,8 @@ namespace NorthwindConsole
                     Console.WriteLine("2) Add Category");
                     Console.WriteLine("3) Display Category and related products");
                     Console.WriteLine("4) Display all Categories and their related products");
-                    Console.WriteLine("5) Edit Categories");
-                    Console.WriteLine("6) Delete Categories");
+                    Console.WriteLine("5) Edit Products");
+                    Console.WriteLine("6) Delete Products");
                     Console.WriteLine("\"q\" to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
@@ -114,23 +114,23 @@ namespace NorthwindConsole
                             foreach (Product p in item.Products)
                             {
                                 Console.WriteLine($"\t{p.ProductName}");
+
+                                if (p.CategoryId != null){
+
+                                Product UpdatedProduct = InputProduct(db);
+
+                            if (UpdatedProduct != null){
+                            
+                               UpdatedProduct.CategoryId = p.CategoryId;
+                               db.InputProduct(UpdatedProduct);
+                               logger.Info($"Product (id: {p.CategoryId}) updated");
                             }
-                        }
-                    }
 
-                    else if (choice == "5")
-                    {
-                        // delete product
-                        Console.WriteLine("Choose the Category to edit:");
-    
-                        var db = new NorthwindContext();
-                        var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
-                        foreach(var item in query)
-                        {
-                            Console.WriteLine($"{item.CategoryName}");
+                                }
 
-                            logger.Info("Category edited");
-                        }
+                                logger.Info($"Product(id:{p.CategoryId}) updated");
+                            }
+                            }
                     }
                     Console.WriteLine();
 
