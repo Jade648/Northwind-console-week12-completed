@@ -143,6 +143,11 @@ namespace NorthwindConsole
 
             logger.Info("Program ended");
         }
+
+        private static Product InputProduct(NorthwindContext db)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
