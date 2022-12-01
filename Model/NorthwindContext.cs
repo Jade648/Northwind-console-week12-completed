@@ -30,7 +30,7 @@ namespace Northwind_Console.Model
         public virtual DbSet<Supplier> Suppliers { get; set; }
         public virtual DbSet<Territory> Territories { get; set; }
 
-        public void EditProduct(Product UpdatedProduct)
+        public void InputProduct(Product UpdatedProduct)
         {
             Product product = this.Products.Find(UpdatedProduct.CategoryId);
             product.CategoryId = UpdatedProduct.CategoryId;
