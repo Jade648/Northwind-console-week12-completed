@@ -117,10 +117,8 @@ namespace NorthwindConsole
 
                                 if (p.CategoryId != null){
 
-                                Product UpdatedProduct = InputProduct(db);
-
+                                    Product UpdatedProduct = InputProduct(db);
                             if (UpdatedProduct != null){
-                            
                                UpdatedProduct.CategoryId = p.CategoryId;
                                db.InputProduct(UpdatedProduct);
                                logger.Info($"Product (id: {p.CategoryId}) updated");
@@ -130,7 +128,7 @@ namespace NorthwindConsole
 
                                 logger.Info($"Product(id:{p.CategoryId}) updated");
                             }
-                            }
+                        }
                     }
                     Console.WriteLine();
 
@@ -144,10 +142,6 @@ namespace NorthwindConsole
             logger.Info("Program ended");
         }
 
-        private static Product InputProduct(NorthwindContext db)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 
