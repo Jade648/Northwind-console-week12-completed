@@ -2,10 +2,10 @@
 using NLog.Web;
 using System.IO;
 using System.Linq;
-using Northwind_Console.Model;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using NorthwindConsole.Model;
 
 namespace NorthwindConsole
 {
@@ -105,6 +105,7 @@ namespace NorthwindConsole
                         }
                     }
                     else if (choice == "4")
+                    
                     {
                         var db = new NorthwindContext();
                         var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
@@ -114,26 +115,42 @@ namespace NorthwindConsole
                             foreach (Product p in item.Products)
                             {
                                 Console.WriteLine($"\t{p.ProductName}");
-
-                                if (p.CategoryId != null){
-
-                                    Product UpdatedProduct = InputProduct(db);
-                            if (UpdatedProduct != null){
-                               UpdatedProduct.CategoryId = p.CategoryId;
-                               db.InputProduct(UpdatedProduct);
-                               logger.Info($"Product (id: {p.CategoryId}) updated");
-                            }
-
-                                }
-
-                                logger.Info($"Product(id:{p.CategoryId}) updated");
-                            }
+                            }        
                         }
+                        
+                    } else if (choice == "5"){
+
+                        Console.WriteLine("Choose a Product to Edit:");
+
+                          var db = new NorthwindContext();
+                          var product = GetProduct(db);
+
+                        if (product != null){
+
+                          Product UpdatedProduct = InputProduct(db);
+                        
+                        if (UpdatedProduct != null){
+                          UpdatedProduct.ProductId = product.ProductId; 
+                            db.EditProduct(UpdatedProduct);
+                        logger.Info($"Products (Id: {product.ProductId})updated");
+                        
+                        }
+                          else if (choice == "6") {
+
+                            Console.WriteLine("Choose the product to delte:");
+                            var db = new NorthwindContext();
+                            var product = GetProduct(db);
+                            if(product != null){
+                                db.DeletedProduct(product);
+                                logger.Info($"Product (id: {product.ProductId}) deleted");
+                            }
+                          }      
                     }
+
                     Console.WriteLine();
 
-                } while (choice.ToLower() != "q");
-            }
+                }while (choice.ToLower() != "q");
+                
             catch (Exception ex)
             {
                 logger.Error(ex.Message);
@@ -142,6 +159,63 @@ namespace NorthwindConsole
             logger.Info("Program ended");
         }
 
+        public static Product GetProduct(NorthwindContext db){
+
+            var products = db.Products.OrderBy(p => p.ProductId);
+            foreach(Product p in products){
+                 Console.WriteLine($"{p.ProductId}: {p.Name}");
+            }
+
+         if (int.TryParse(Console.ReadLine(),out int  ProductId))
+         {
+            Product product = db.Products.FirstOrDefault(p => p.ProductId == ProductId);
+            if (product != null){
+                return product;
+            }
+         }
+          logger.Error("Invalid ProductId");
+           return null;
+        }
+
+        public  static Product InputProduct(NorthwindContext db){
+
+            Product product = new Product();
+            Console.WriteLine("Enter the Product name");
+            Product.Name = Console.ReadLine();
+            
+            ValidationContext context = new ValidationContext (product, null, null);
+            List<ValidationResult> results = new List<ValidationResult>();
+             
+         var isValid = Validator.TryValidateObject(product, context, results, true);
+          if(isValid)
+          {
+
+            if(db.Products.Any(p => p.Name == product.Name))
+            {
+                 isValid = false;
+                 results.Add(new ValidationResult("Product name exists",new string[] {Name}));
+            }
+             else
+             {
+                logger.Info("Validation passed");
+             }
+
+            }
+
+            if (!isValid)
+            {
+                foreach( var result in results)
+                {
+
+                logger.Error($"{result.MemberNames.First()}: {result.ErrorMessage}");  
+            }
+
+            return null;
+        }
+
+           return product;
+
+            } 
+        }
     }
-}
 

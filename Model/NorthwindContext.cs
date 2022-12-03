@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
-namespace Northwind_Console.Model
+namespace NorthwindConsole.Model
 {
     public partial class NorthwindContext : DbContext
     {
@@ -30,12 +30,6 @@ namespace Northwind_Console.Model
         public virtual DbSet<Supplier> Suppliers { get; set; }
         public virtual DbSet<Territory> Territories { get; set; }
 
-        public void InputProduct(Product UpdatedProduct)
-        {
-            Product product = this.Products.Find(UpdatedProduct.CategoryId);
-            product.CategoryId = UpdatedProduct.CategoryId;
-            this.SaveChanges();
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -300,6 +294,19 @@ namespace Northwind_Console.Model
 
             OnModelCreatingPartial(modelBuilder);
         }
+
+        public void DeletedProduct(Product product){
+
+                this.Products.Remove(product);
+                 this.SaveChanges();
+          }
+
+          public void EditProduct(Product UpdatedProduct){
+            Product product = this.Products.Find(UpdatedProduct.ProductId);
+            product.ProductName = UpdatedProduct.ProductName;
+            this.SaveChanges();
+            
+          }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
