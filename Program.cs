@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NLog.Web;
 using System.IO;
 using System.Linq;
@@ -23,11 +23,11 @@ namespace NorthwindConsole
                 do
                 {
                     Console.WriteLine("1) Display Categories");
-                    Console.WriteLine("2) Add Category");
                     Console.WriteLine("3) Display Category and related products");
-                    Console.WriteLine("4) Display all Categories and their related products");
-                    Console.WriteLine("5) Edit Products");
-                    Console.WriteLine("6) Delete Products");
+                    Console.WriteLine("3) Display all Categories and their related products");
+                    Console.WriteLine("4) Add Product");
+                    Console.WriteLine("5) Edit Product");
+                    Console.WriteLine("6) Delete Product");
                     Console.WriteLine("\"q\" to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
@@ -45,7 +45,7 @@ namespace NorthwindConsole
                             Console.WriteLine($"{item.CategoryName} - {item.Description}");
                         }
                         Console.ForegroundColor = ConsoleColor.White;
-                    } else if (choice == "2")
+                    } else if (choice == "1")
                     {
                         Category category = new Category();
                         Console.WriteLine("Enter Category Name:");
@@ -71,8 +71,9 @@ namespace NorthwindConsole
                             
                             else
                             {
-                                logger.Info("Validation passed");
-                                // TODO: save category to db
+                                // SDave category to db
+                                db.AddCategory(category);
+                                logger.Info("New catgeory added");
                             }
                         }
                         if (!isValid)
@@ -82,7 +83,8 @@ namespace NorthwindConsole
                                 logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
                             }
                         }
-                    }else if (choice == "3")
+
+                    }else if (choice == "2")
                     {
                         var db = new NorthwindContext();
                         var query = db.Categories.OrderBy(p => p.CategoryId);
@@ -104,8 +106,7 @@ namespace NorthwindConsole
                             Console.WriteLine(p.ProductName);
                         }
                     }
-                    else if (choice == "4")
-                    
+                    else if (choice == "3")
                     {
                         var db = new NorthwindContext();
                         var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
@@ -117,8 +118,12 @@ namespace NorthwindConsole
                                 Console.WriteLine($"\t{p.ProductName}");
                             }        
                         }
-                        
-                    } else if (choice == "5"){
+                    } else if (choice == "4") {
+                        var db = new NorthwindContext();
+                        // Add new product
+                        Product NewProduct = InputProduct(db);
+                        db.AddProduct(NewProduct);
+                    } else if (choice == "5") {
 
                         Console.WriteLine("Choose a Product to Edit:");
 
@@ -127,31 +132,28 @@ namespace NorthwindConsole
 
                         if (product != null){
 
-                          Product UpdatedProduct = InputProduct(db);
+                            Product UpdatedProduct = InputProduct(db);
                         
-                        if (UpdatedProduct != null){
-                          UpdatedProduct.ProductId = product.ProductId; 
-                            db.EditProduct(UpdatedProduct);
-                        logger.Info($"Products (Id: {product.ProductId})updated");
-                        
+                            if (UpdatedProduct != null) {
+                                UpdatedProduct.ProductId = product.ProductId; 
+                                db.EditProduct(UpdatedProduct);
+                                logger.Info($"Products (Id: {product.ProductId})updated");
+                            }  
                         }
-                          else if (choice == "6") {
+                        Console.WriteLine();
+                    } else if (choice == "6") {
+                        Console.WriteLine("Choose the product to delete:");
+                        var db = new NorthwindContext();
+                        var product = GetProduct(db);
+                        if(product != null){
+                            db.DeleteProduct(product);
+                            logger.Info($"Product (id: {product.ProductId}) deleted");
+                        }
+                    }    
 
-                            Console.WriteLine("Choose the product to delte:");
-                            var db = new NorthwindContext();
-                            var product = GetProduct(db);
-                            if(product != null){
-                                db.DeletedProduct(product);
-                                logger.Info($"Product (id: {product.ProductId}) deleted");
-                            }
-                          }      
-                    }
+                } while (choice.ToLower() != "q");
 
-                    Console.WriteLine();
-
-                }while (choice.ToLower() != "q");
-                
-            catch (Exception ex)
+            } catch (Exception ex)
             {
                 logger.Error(ex.Message);
             }
@@ -163,7 +165,7 @@ namespace NorthwindConsole
 
             var products = db.Products.OrderBy(p => p.ProductId);
             foreach(Product p in products){
-                 Console.WriteLine($"{p.ProductId}: {p.Name}");
+                 Console.WriteLine($"{p.ProductId}: {p.ProductName}");
             }
 
          if (int.TryParse(Console.ReadLine(),out int  ProductId))
@@ -178,44 +180,50 @@ namespace NorthwindConsole
         }
 
         public  static Product InputProduct(NorthwindContext db){
-
             Product product = new Product();
             Console.WriteLine("Enter the Product name");
-            Product.Name = Console.ReadLine();
+            product.ProductName = Console.ReadLine();
+
+            Console.WriteLine("Select the catgeory:");
+            foreach(Category c in db.Categories.OrderBy(c => c.CategoryName)){
+                Console.WriteLine("{0}) {1}", c.CategoryId, c.CategoryName);
+            }
+            product.CategoryId = Convert.ToInt32(Console.ReadLine());
             
             ValidationContext context = new ValidationContext (product, null, null);
             List<ValidationResult> results = new List<ValidationResult>();
              
-         var isValid = Validator.TryValidateObject(product, context, results, true);
-          if(isValid)
-          {
-
-            if(db.Products.Any(p => p.Name == product.Name))
+            var isValid = Validator.TryValidateObject(product, context, results, true);
+            if(isValid)
             {
-                 isValid = false;
-                 results.Add(new ValidationResult("Product name exists",new string[] {Name}));
-            }
-             else
-             {
-                logger.Info("Validation passed");
-             }
 
-            }
-
-            if (!isValid)
-            {
-                foreach( var result in results)
+                if(db.Products.Any(p => p.ProductName == product.ProductName))
                 {
+                    isValid = false;
+                    results.Add(new ValidationResult("Product name exists",new string[] {"Name"}));
+                }
+                else
+                {
+                    logger.Info("Validation passed");
+                }
 
-                logger.Error($"{result.MemberNames.First()}: {result.ErrorMessage}");  
+                }
+
+                if (!isValid)
+                {
+                    foreach( var result in results)
+                    {
+
+                    logger.Error($"{result.MemberNames.First()}: {result.ErrorMessage}");  
+                }
+
+                return null;
+                    
             }
 
-            return null;
-        }
+            return product;
 
-           return product;
-
-            } 
-        }
+        } 
     }
+}
 
