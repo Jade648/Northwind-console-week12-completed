@@ -23,7 +23,7 @@ namespace NorthwindConsole
                 do
                 {
                     Console.WriteLine("1) Display Categories");
-                    Console.WriteLine("3) Display Category and related products");
+                    Console.WriteLine("2) Display Category and related products");
                     Console.WriteLine("3) Display all Categories and their related products");
                     Console.WriteLine("4) Add Product");
                     Console.WriteLine("5) Edit Product");
